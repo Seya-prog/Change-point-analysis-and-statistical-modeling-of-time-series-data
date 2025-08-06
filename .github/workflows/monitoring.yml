@@ -35,7 +35,7 @@ jobs:
         python scripts/generate_drift_report.py
         
     - name: Upload drift report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: data-drift-report
         path: reports/data_drift_report.html
@@ -77,7 +77,7 @@ jobs:
         python scripts/generate_performance_report.py
         
     - name: Upload performance report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: model-performance-report
         path: reports/model_performance_report.html

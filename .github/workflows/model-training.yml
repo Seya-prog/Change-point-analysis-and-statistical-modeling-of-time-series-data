@@ -59,7 +59,7 @@ jobs:
         python scripts/generate_model_report.py --model-type ${{ matrix.model }}
         
     - name: Upload model artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: model-${{ matrix.model }}-artifacts
         path: |
@@ -106,7 +106,7 @@ jobs:
         python scripts/generate_comparison_report.py
         
     - name: Upload comparison results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: model-comparison-report
         path: reports/model_comparison.html
