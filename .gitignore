@@ -102,6 +102,7 @@ dmypy.json
 
 # Project specific
 data/raw/*
+data/events/*
 !data/raw/.gitkeep
 data/processed/*
 !data/processed/.gitkeep

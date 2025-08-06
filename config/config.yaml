@@ -1,0 +1,168 @@
+# Configuration for Brent Oil Price Change-Point Analysis
+# Project: Birhan Energies - Energy Market Intelligence
+
+# Data Configuration
+data:
+  # Brent oil price data
+  brent_oil:
+    start_date: "1987-05-20"
+    end_date: "2022-09-30"
+    source: "yahoo"  # yfinance source
+    symbol: "BZ=F"  # Brent crude futures
+    
+  # Paths
+  raw_data_path: "data/raw"
+  processed_data_path: "data/processed"
+  events_data_path: "data/events"
+  
+  # File formats
+  price_data_file: "brent_oil_prices.csv"
+  events_data_file: "geopolitical_events.csv"
+
+# Geopolitical Events (Key events affecting oil prices)
+events:
+  # Major events to research and compile
+  categories:
+    - "OPEC_decisions"
+    - "geopolitical_conflicts"
+    - "economic_sanctions"
+    - "supply_disruptions"
+    - "financial_crises"
+    - "policy_changes"
+  
+  # Event data structure
+  required_fields:
+    - "date"
+    - "event_name"
+    - "category"
+    - "description"
+    - "expected_impact"
+    - "region"
+
+# Bayesian Change Point Detection Configuration
+change_point_detection:
+  # PyMC model parameters
+  model:
+    prior_changepoint_prob: 0.01  # Prior probability of change point
+    n_changepoints: 25  # Maximum number of change points
+    changepoint_range: 0.8  # Proportion of history for change points
+    
+  # MCMC sampling parameters
+  sampling:
+    draws: 2000
+    tune: 1000
+    chains: 4
+    cores: 4
+    target_accept: 0.95
+    
+  # Model selection
+  model_comparison:
+    methods: ["WAIC", "LOO", "DIC"]
+    
+# Time Series Analysis Configuration
+time_series:
+  # Preprocessing
+  preprocessing:
+    handle_missing: "interpolate"  # Options: drop, interpolate, forward_fill
+    outlier_detection: true
+    outlier_threshold: 3.0  # Standard deviations
+    
+  # Stationarity tests
+  stationarity_tests:
+    - "ADF"  # Augmented Dickey-Fuller
+    - "KPSS"  # Kwiatkowski-Phillips-Schmidt-Shin
+    - "Phillips-Perron"
+    
+  # Differencing
+  max_diff_order: 2
+
+# Visualization Configuration
+visualization:
+  # Plot settings
+  style: "plotly_white"
+  color_palette: ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd"]
+  figure_size:
+    width: 1200
+    height: 600
+  
+  # Interactive dashboard
+  dashboard:
+    framework: "streamlit"  # Options: streamlit, dash
+    port: 8501
+    theme: "light"
+    
+  # Export settings
+  export:
+    format: ["png", "html", "pdf"]
+    dpi: 300
+    
+# Model Evaluation
+evaluation:
+  # Metrics for change point detection
+  metrics:
+    - "precision"
+    - "recall"
+    - "f1_score"
+    - "mean_absolute_error"
+    
+  # Cross-validation
+  cv:
+    method: "time_series_split"
+    n_splits: 5
+    test_size: 0.2
+
+# Output Configuration
+output:
+  # Results directory structure
+  results_dir: "results"
+  subdirs:
+    - "models"
+    - "plots"
+    - "reports"
+    - "data_analysis"
+    
+  # Report generation
+  reports:
+    formats: ["html", "pdf"]
+    template: "modern_report_template.html"
+    
+# Logging Configuration
+logging:
+  level: "INFO"
+  format: "{time:YYYY-MM-DD HH:mm:ss} | {level} | {name} | {message}"
+  file: "logs/brent_oil_analysis.log"
+  rotation: "10 MB"
+  retention: "30 days"
+
+# Performance Configuration
+performance:
+  # Parallel processing
+  n_jobs: -1  # Use all available cores
+  
+  # Memory management
+  chunk_size: 10000
+  
+  # Caching
+  cache_enabled: true
+  cache_dir: ".cache"
+
+# API Configuration (for data fetching)
+api:
+  # Rate limiting
+  rate_limit:
+    requests_per_minute: 60
+    
+  # Retry configuration
+  retry:
+    max_attempts: 3
+    backoff_factor: 2
+    
+# Environment Configuration
+environment:
+  development:
+    debug: true
+    log_level: "DEBUG"
+    
+  production:
+    debug: false
+    log_level: "INFO"

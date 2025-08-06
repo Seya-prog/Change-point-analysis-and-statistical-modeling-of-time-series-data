@@ -1,0 +1,104 @@
+name: Dashboard Deployment
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'dashboard/**'
+      - 'src/visualization/**'
+  workflow_dispatch:
+
+jobs:
+  build-dashboard:
+    name: Build Dashboard
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Build dashboard assets
+      run: |
+        python scripts/build_dashboard.py
+        
+    - name: Test dashboard
+      run: |
+        python -m pytest tests/test_dashboard.py -v
+        
+    - name: Upload dashboard artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: dashboard-build
+        path: dashboard/build/
+        
+  deploy-streamlit:
+    name: Deploy to Streamlit Cloud
+    runs-on: ubuntu-latest
+    needs: build-dashboard
+    environment: production
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Download dashboard build
+      uses: actions/download-artifact@v3
+      with:
+        name: dashboard-build
+        path: dashboard/build/
+        
+    - name: Deploy to Streamlit Cloud
+      env:
+        STREAMLIT_SHARING_TOKEN: ${{ secrets.STREAMLIT_SHARING_TOKEN }}
+      run: |
+        curl -X POST \
+          -H "Authorization: Bearer $STREAMLIT_SHARING_TOKEN" \
+          -H "Content-Type: application/json" \
+          -d '{"repository": "${{ github.repository }}", "branch": "main", "main_module": "dashboard/app.py"}' \
+          https://share.streamlit.io/api/v1/deploy
+          
+  deploy-heroku:
+    name: Deploy to Heroku
+    runs-on: ubuntu-latest
+    needs: build-dashboard
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Deploy to Heroku
+      uses: akhileshns/heroku-deploy@v3.12.12
+      with:
+        heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+        heroku_app_name: "brent-oil-analysis"
+        heroku_email: ${{ secrets.HEROKU_EMAIL }}
+        dockerfile_path: "./Dockerfile"
+        
+  test-deployment:
+    name: Test Deployment
+    runs-on: ubuntu-latest
+    needs: [deploy-streamlit, deploy-heroku]
+    
+    steps:
+    - name: Test Streamlit deployment
+      run: |
+        curl -f https://share.streamlit.io/${{ github.repository_owner }}/change-point-analysis/main/dashboard/app.py || exit 1
+        
+    - name: Test Heroku deployment
+      run: |
+        curl -f https://brent-oil-analysis.herokuapp.com/health || exit 1
+        
+    - name: Run end-to-end tests
+      run: |
+        python -m pytest tests/test_e2e.py -v
