@@ -36,7 +36,7 @@ jobs:
         python -m pytest tests/test_dashboard.py -v
         
     - name: Upload dashboard artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: dashboard-build
         path: dashboard/build/
