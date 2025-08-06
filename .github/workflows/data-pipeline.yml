@@ -54,7 +54,7 @@ jobs:
         
     - name: Trigger model retraining
       if: success()
-      uses: peter-evans/repository-dispatch@v2
+      uses: peter-evans/repository-dispatch@v3
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         event-type: retrain-models
