@@ -14,6 +14,91 @@ data:
   raw_data_path: "data/raw"
   processed_data_path: "data/processed"
   events_data_path: "data/events"
+
+# Change-Point Model Configuration
+change_point_model:
+  model_type: "hierarchical"  # basic, robust, hierarchical, online
+  max_changepoints: 25
+  changepoint_prior_scale: 0.05
+  changepoint_range: 0.8
+  sigma_prior: 5.0
+  mu_prior_scale: 10.0
+  nu_prior: 4.0  # For Student-t model
+  
+  # MCMC Configuration
+  mcmc:
+    draws: 2000
+    tune: 1000
+    chains: 4
+    cores: 4
+    target_accept: 0.95
+    max_treedepth: 12
+  
+  # Variational Inference Configuration
+  variational:
+    n: 50000
+    method: "advi"
+
+# Regime-Switching Model Configuration
+regime_model:
+  model_type: "ms_ar"  # ms_ar, ms_x, hmm, tar
+  n_regimes: 3
+  order: 2
+  switching_variance: true
+  switching_trend: true
+  max_iter: 1000
+  tolerance: 1e-6
+  random_state: 42
+
+# Volatility Model Configuration
+volatility_model:
+  model_type: "garch"  # garch, egarch, gjr_garch, stochastic_vol, regime_vol
+  p: 1  # GARCH order
+  q: 1  # ARCH order
+  mean_model: "constant"  # constant, ar, har
+  distribution: "normal"  # normal, t, skewt
+  max_iter: 1000
+  tolerance: 1e-6
+  rescale: true
+
+# Ensemble Model Configuration
+ensemble_model:
+  models:
+    random_forest:
+      enabled: true
+      params:
+        n_estimators: 100
+        max_depth: 10
+        random_state: 42
+    gradient_boosting:
+      enabled: true
+      params:
+        n_estimators: 100
+        learning_rate: 0.1
+        max_depth: 6
+        random_state: 42
+    linear_regression:
+      enabled: true
+      params: {}
+    ridge_regression:
+      enabled: true
+      params:
+        alpha: 1.0
+        random_state: 42
+  
+  ensemble_method: "weighted_average"  # simple_average, weighted_average, stacking
+  weight_method: "performance"  # equal, performance, dynamic
+  
+  feature_engineering:
+    lags: [1, 2, 3, 5, 10, 20]
+    rolling_windows: [5, 10, 20, 30]
+    technical_indicators: true
+    volatility_features: true
+  
+  validation:
+    method: "time_series_split"
+    n_splits: 5
+    test_size: 0.2
   
   # File formats
   price_data_file: "brent_oil_prices.csv"
