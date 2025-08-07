@@ -1,0 +1,27 @@
+# Brent Oil Price Change-Point Analysis Report
+============================================================
+
+## Data Summary
+- **Analysis Period**: 1987-05-20 00:00:00 to 2022-11-14 00:00:00
+- **Total Observations**: 9,011
+- **Price Range**: $9.10 - $143.95
+- **Average Price**: $48.42
+- **Price Volatility (Std)**: $32.86
+
+## Change-Point Analysis
+- **Number of Change-Points Detected**: 0
+## Model Performance
+- **Model Type**: Bayesian Hierarchical
+
+## Key Findings
+- No significant change-points detected in the analyzed period.
+- Oil prices appear to follow a relatively stable pattern.
+- High volatility periods: 19.9% of the time
+
+## Recommendations
+- **For Investors**: Consider the identified regime changes when making investment decisions.
+- **For Risk Management**: Pay attention to high volatility periods around change-points.
+- **For Policy Analysis**: Investigate geopolitical events coinciding with change-points.
+
+---
+Report generated on: 2025-08-07 23:58:36
