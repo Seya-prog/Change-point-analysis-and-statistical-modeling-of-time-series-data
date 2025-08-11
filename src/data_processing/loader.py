@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Optional, Dict, Any, Tuple
 from loguru import logger
 import yaml
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, field_validator
 from datetime import datetime, date
 
 
@@ -21,7 +21,8 @@ class DataConfig(BaseModel):
     source: str = "yahoo"
     symbol: str = "BZ=F"
     
-    @validator('start_date', 'end_date')
+    @field_validator('start_date', 'end_date')
+    @classmethod
     def validate_date_format(cls, v):
         try:
             datetime.strptime(v, '%Y-%m-%d')
@@ -39,8 +40,8 @@ class DataLoader:
         """Initialize the data loader with configuration."""
         # Find the project root directory
         self.project_root = self._find_project_root()
-        self.config_path = config_path or str(self.project_root / "config" / "config.yaml")
-        self.config = self._load_config()
+        self.config_path = config_path
+        self.config = self._load_config() if config_path else self._get_default_config()
         self.data_config = DataConfig(**self.config['data']['brent_oil'])
         
     def _find_project_root(self) -> Path:
@@ -57,6 +58,19 @@ class DataLoader:
         # Fallback to current directory
         return Path.cwd()
         
+    def _get_default_config(self) -> Dict[str, Any]:
+        """Get default configuration when config file is not available."""
+        return {
+            'data': {
+                'brent_oil': {
+                    'start_date': '1987-05-20',
+                    'end_date': '2022-09-30',
+                    'source': 'yahoo',
+                    'symbol': 'BZ=F'
+                }
+            }
+        }
+    
     def _load_config(self) -> Dict[str, Any]:
         """Load configuration from YAML file."""
         try:
@@ -65,8 +79,8 @@ class DataLoader:
             logger.info(f"Configuration loaded from {self.config_path}")
             return config
         except FileNotFoundError:
-            logger.error(f"Configuration file not found: {self.config_path}")
-            raise
+            logger.warning(f"Configuration file not found: {self.config_path}, using defaults")
+            return self._get_default_config()
         except yaml.YAMLError as e:
             logger.error(f"Error parsing configuration file: {e}")
             raise
