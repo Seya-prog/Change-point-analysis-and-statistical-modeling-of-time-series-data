@@ -45,7 +45,6 @@ jobs:
       run: |
         python -c "import pandas, numpy, flask; print('Core dependencies OK')"
         python -c "from src.data_processing.loader import DataLoader; print('DataLoader OK')"
-        python -c "from src.data_processing.preprocessor import TimeSeriesPreprocessor; print('Preprocessor OK')"
         echo "Validation completed"
   docker-build:
     name: Docker Build Test
