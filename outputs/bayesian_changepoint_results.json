@@ -1,0 +1,68 @@
+{
+  "analysis_date": "2025-08-07T23:58:36.639280",
+  "data_summary": {
+    "total_observations": 451,
+    "date_range": {
+      "start": "1987-05-20 00:00:00",
+      "end": "2022-10-31 00:00:00"
+    },
+    "price_statistics": {
+      "mean": 48.424767184035474,
+      "std": 32.81712796867427,
+      "min": 9.57,
+      "max": 136.02
+    }
+  },
+  "model_config": {
+    "max_changepoints": 10,
+    "n_init": 5,
+    "random_state": 42,
+    "threshold": 0.5,
+    "min_regime_size": 30,
+    "max_iter": 500,
+    "tol": 0.001
+  },
+  "diagnostics_summary": {
+    "fit": {
+      "basic_metrics": {}
+    },
+    "change_points": {
+      "n_significant_changepoints": 0,
+      "changepoint_locations": [],
+      "max_probability": 0.0,
+      "mean_probability": 0.0,
+      "changepoint_strength": {
+        "max_strength": 0.0,
+        "n_strong_changepoints": 0,
+        "n_moderate_changepoints": 0,
+        "strength_distribution": {
+          "mean": 0.0,
+          "std": 0.0,
+          "skewness": NaN
+        }
+      },
+      "temporal_distribution": {
+        "spacing": "insufficient_data"
+      }
+    },
+    "regimes": {},
+    "posterior_predictive": {
+      "ppc_summary": "Posterior predictive checks require full model trace",
+      "implemented": false
+    },
+    "overall": {
+      "model_quality": "acceptable",
+      "recommendations": [],
+      "warnings": [
+        "No significant change points detected"
+      ],
+      "confidence_level": "medium"
+    }
+  },
+  "change_points": [],
+  "changepoint_statistics": {
+    "total_detected": 0,
+    "method_used": "unknown",
+    "locations": []
+  }
+}

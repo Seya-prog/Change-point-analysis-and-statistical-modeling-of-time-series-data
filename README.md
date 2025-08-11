@@ -36,7 +36,53 @@ pip install -r requirements.txt
 
 ## Usage
 
-[To be updated as project develops]
+### Task 3: Interactive Dashboard (Docker Setup)
+
+The project includes a complete Flask + React dashboard that can be run using Docker:
+
+#### Quick Start with Docker
+```bash
+# Windows
+docker-start.bat
+
+# Linux/Mac
+chmod +x docker-start.sh
+./docker-start.sh
+```
+
+#### Manual Docker Setup
+```bash
+# Build and start all services
+docker-compose up --build -d
+
+# Access the dashboard
+# Frontend: http://localhost:3000
+# Backend API: http://localhost:5000/api
+```
+
+#### Local Development
+```bash
+# Backend (Flask)
+cd backend
+python app.py
+
+# Frontend (React)
+cd frontend
+npm install
+npm start
+```
+
+### Previous Tasks
+
+#### Task 1: Data Processing and Analysis
+```bash
+python src/data_processing/main.py
+```
+
+#### Task 2: Bayesian Change-Point Analysis
+```bash
+python bayesian_changepoint_analysis.py
+```
 
 ## Features
 
