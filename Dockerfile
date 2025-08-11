@@ -79,7 +79,6 @@ COPY --from=frontend-builder /app/frontend/build /usr/share/nginx/html
 # Copy application code
 COPY src/ ./src/
 COPY backend/ ./backend/
-COPY config/ ./config/
 COPY data/ ./data/
 
 # Copy built React app from frontend builder
