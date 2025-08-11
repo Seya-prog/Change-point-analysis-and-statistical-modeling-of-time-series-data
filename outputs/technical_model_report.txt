@@ -1,0 +1,12 @@
+# Technical Model Report
+========================================
+
+## Model Configuration
+- **Model Type**: Bayesian Hierarchical Change-Point Detection
+- **Sampling Method**: MCMC
+- **Number of Samples**: Unknown
+- **Number of Chains**: Unknown
+- **Tune Steps**: Unknown
+
+## Model Diagnostics
+## Parameter Estimates
