@@ -12,11 +12,9 @@ __email__ = "your.email@example.com"
 from . import data_processing
 from . import change_point
 from . import visualization
-from . import utils
 
 __all__ = [
     "data_processing",
     "change_point", 
-    "visualization",
-    "utils"
+    "visualization"
 ]

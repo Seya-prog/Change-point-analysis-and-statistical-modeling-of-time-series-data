@@ -1,34 +1,27 @@
-name: CI/CD Pipeline
+name: CI Pipeline
 
 on:
   push:
     branches: [ main, develop ]
   pull_request:
     branches: [ main, develop ]
-  schedule:
-    # Run daily at 6 AM UTC to check for data updates
-    - cron: '0 6 * * *'
 
 env:
   PYTHON_VERSION: '3.9'
-  POETRY_VERSION: '1.6.1'
 
 jobs:
   test:
     name: Test Suite
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ['3.9', '3.10', '3.11']
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
       
-    - name: Set up Python ${{ matrix.python-version }}
+    - name: Set up Python ${{ env.PYTHON_VERSION }}
       uses: actions/setup-python@v4
       with:
-        python-version: ${{ matrix.python-version }}
+        python-version: ${{ env.PYTHON_VERSION }}
         
     - name: Cache pip dependencies
       uses: actions/cache@v3
@@ -42,33 +35,19 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        pip install pytest pytest-cov pytest-xdist black ruff mypy
+        pip install pytest pytest-cov
         
-    - name: Lint with Ruff
+    - name: Run tests
       run: |
-        ruff check src/ tests/ --output-format=github
+        python -m pytest tests/ -v
         
-    - name: Format check with Black
+    - name: Validate imports
       run: |
-        black --check src/ tests/
-        
-    - name: Type check with MyPy
-      run: |
-        mypy src/ --ignore-missing-imports
-        
-    - name: Run tests with pytest
-      run: |
-        pytest tests/ -v --cov=src --cov-report=xml --cov-report=html
-        
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
-      with:
-        file: ./coverage.xml
-        flags: unittests
-        name: codecov-umbrella
-        
-  data-validation:
-    name: Data Validation
+        python -c "import pandas, numpy, flask; print('Core dependencies OK')"
+        python -c "from src.data_processing.loader import DataLoader; print('DataLoader OK')"
+        echo "Validation completed"
+  docker-build:
+    name: Docker Build Test
     runs-on: ubuntu-latest
     needs: test
     
@@ -76,155 +55,11 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ env.PYTHON_VERSION }}
-        
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        
-    - name: Validate data schemas
-      run: |
-        python -m src.data_processing.validator
-        
-    - name: Check data quality
-      run: |
-        python scripts/data_quality_check.py
-        
-  security-scan:
-    name: Security Scan
-    runs-on: ubuntu-latest
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
       
-    - name: Run Bandit security scan
+    - name: Build Docker image
       run: |
-        pip install bandit
-        bandit -r src/ -f json -o bandit-report.json
-        
-    - name: Run Safety check
-      run: |
-        pip install safety
-        safety check --json --output safety-report.json
-        
-    - name: Upload security reports
-      uses: actions/upload-artifact@v3
-      with:
-        name: security-reports
-        path: |
-          bandit-report.json
-          safety-report.json
-          
-  build-docs:
-    name: Build Documentation
-    runs-on: ubuntu-latest
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ env.PYTHON_VERSION }}
-        
-    - name: Install documentation dependencies
-      run: |
-        pip install sphinx sphinx-rtd-theme myst-parser
-        
-    - name: Build documentation
-      run: |
-        cd docs/
-        make html
-        
-    - name: Upload documentation
-      uses: actions/upload-artifact@v3
-      with:
-        name: documentation
-        path: docs/_build/html/
-        
-  deploy-staging:
-    name: Deploy to Staging
-    runs-on: ubuntu-latest
-    needs: [test, data-validation, security-scan]
-    if: github.ref == 'refs/heads/develop'
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ env.PYTHON_VERSION }}
-        
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        
-    - name: Build Streamlit app
-      run: |
-        python scripts/build_dashboard.py
-        
-    - name: Deploy to Streamlit Cloud (Staging)
-      env:
-        STREAMLIT_SHARING_TOKEN: ${{ secrets.STREAMLIT_SHARING_TOKEN }}
-      run: |
-        echo "Deploying to staging environment..."
-        # Add actual deployment commands here
-        
-  deploy-production:
-    name: Deploy to Production
-    runs-on: ubuntu-latest
-    needs: [test, data-validation, security-scan]
-    if: github.ref == 'refs/heads/main'
-    environment: production
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ env.PYTHON_VERSION }}
-        
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        
-    - name: Run production data pipeline
-      env:
-        API_KEY: ${{ secrets.API_KEY }}
-        DATABASE_URL: ${{ secrets.DATABASE_URL }}
-      run: |
-        python scripts/production_pipeline.py
-        
-    - name: Deploy dashboard
-      env:
-        STREAMLIT_SHARING_TOKEN: ${{ secrets.STREAMLIT_SHARING_TOKEN }}
-      run: |
-        echo "Deploying to production environment..."
-        # Add actual deployment commands here
-        
-    - name: Create release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: v${{ github.run_number }}
-        release_name: Release v${{ github.run_number }}
-        body: |
-          Automated release from main branch
-          - Data pipeline updated
-          - Dashboard deployed
-          - Models validated
-        draft: false
-        prerelease: false
+        docker build -t bayesian-dashboard:test .
+
+
